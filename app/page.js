@@ -146,7 +146,6 @@ export default function Home() {
                         bgcolor={msg.role === 'assistant' ? colors.assistant : colors.user}
                         color={colors.text}
                         borderRadius={5}
-                        width="80%"
                         p={2}
                         sx={{
                           fontSize: isMobile ? '0.9rem' : '1rem',
