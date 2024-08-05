@@ -89,7 +89,8 @@ export default function Home() {
 
   return (
     <Box
-      width="100vw"
+      width="100%"
+      minHeight="100vh"
       display="flex"
       flexDirection="column"
       justifyContent="center"
