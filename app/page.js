@@ -8,7 +8,7 @@ export default function Home() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm a chat support assistant. How can I help you today?",
+      content: "Hey there! Ready to discover some hidden gems and unique spots away from the usual tourist trails? Tell me what kind of adventure you’re after, and I’ll help you find your next great destination!"
     },
   ])
   const [message, setMessage] = useState('')
@@ -20,11 +20,11 @@ export default function Home() {
 
   // Pastel color palette
   const colors = {
-    background: '#F0F4F8',
-    assistant: '#E0F4FF',
-    user: '#FFE0E0',
-    text: '#4A4A4A',
-    button: '#B5DEFF',
+    background: '#fafcf5',
+    assistant: '#3B719F',
+    user: '#FF6F6F',
+    text: '#fff',
+    button: '#3B719F',
   }
 
   const sendMessage = async () => {
@@ -98,6 +98,11 @@ export default function Home() {
       sx={{
         padding: isMobile ? theme.spacing(2) : theme.spacing(4),
         backgroundColor: colors.background,
+        backgroundImage: 'url(/background.svg)', 
+        backgroundSize: 'cover',                
+        backgroundRepeat: 'no-repeat',          
+        backgroundPosition: 'center',           
+        overflowX: 'hidden',  // Prevent horizontal scrolling
       }}
     >
       <motion.div
@@ -109,12 +114,15 @@ export default function Home() {
         <Stack
           direction="column"
           width="100%"
-          height={isMobile ? "90vh" : "700px"}
-          border={`1px solid ${colors.text}`}
+          height={isMobile ? "90vh" : "500px"}
+          border={`2px solid ${colors.button}`}
           borderRadius={theme.shape.borderRadius}
           p={2}
           spacing={3}
-          sx={{ backgroundColor: 'white' }}
+          sx={{ 
+            backgroundColor: '#fafcf5',
+            overflow: 'hidden', // Prevent any content overflow
+          }}
         >
           <Stack
             direction="column"
@@ -122,6 +130,9 @@ export default function Home() {
             flexGrow={1}
             overflow="auto"
             maxHeight="100%"
+            sx={{ 
+              overflowX: 'hidden', // Prevent horizontal scrolling
+            }}
           >
             <AnimatePresence>
               {messages.map((msg, index) => (

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const systemPrompt = "You are an advanced conversational AI assistant designed to assist users with a wide range of topics. Your responses should be informative, providing accurate and relevant information based on the user's query. Keep your answers clear and to the point, showing understanding and consideration of the user's context and needs. Maintain a respectful and professional tone in all interactions. Consider the context of previous messages and the user's preferences when crafting your responses. If you are unsure of something, acknowledge that and offer to help further rather than providing potentially misleading information.";
+const systemPrompt = "You are a travel expert specializing in off-the-beaten-path destinations. Provide detailed and interesting recommendations for unique travel experiences.";
 
 const apiKey = process.env.GOOGLE_API_KEY;
 
