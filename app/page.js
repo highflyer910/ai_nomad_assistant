@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Stack, TextField, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Button, Stack, TextField, useMediaQuery, useTheme, MenuItem, Select } from '@mui/material'
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -8,11 +8,12 @@ export default function Home() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hey there! Ready to discover some hidden gems and unique spots away from the usual tourist trails? Tell me what kind of adventure you’re after, and I’ll help you find your next great destination!"
+      content: "Hey there! I'm here to help you discover hidden gems and unique spots away from the tourist trails and provide you with up-to-date weather information. What would you like to know today?"
     },
   ])
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [language, setLanguage] = useState('en') 
   const messagesEndRef = useRef(null)
 
   const theme = useTheme()
@@ -23,7 +24,7 @@ export default function Home() {
     background: '#fafcf5',
     assistant: '#3B719F',
     user: '#FF6F6F',
-    text: '#fff',
+    text: '#FAFFEE',
     button: '#3B719F',
   }
 
@@ -47,7 +48,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, language }),
       });
 
       if (!response.ok) {
@@ -102,18 +103,33 @@ export default function Home() {
         backgroundSize: 'cover',                
         backgroundRepeat: 'no-repeat',          
         backgroundPosition: 'center',           
-        overflowX: 'hidden',  // Prevent horizontal scrolling
+        overflowX: 'hidden', 
       }}
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        style={{ width: '100%', maxWidth: '600px' }}
+        style={{ width: '100%', maxWidth: '500px' }}
       >
+        <Box 
+          sx={{ 
+            backgroundColor: colors.assistant, 
+            borderRadius: '12px', 
+            padding: '20px',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}
+        >
+          <h1 style={{ color: colors.text, marginBottom: '10px' }}>NomadAI</h1>
+          <p style={{ color: colors.text }}>
+            Explore the unexplored with NomadAI.<br/> Your AI guide finds hidden gems and keeps you up-to-date with the latest weather!
+          </p>
+        </Box>
         <Stack
           direction="column"
           width="100%"
+          maxWidth="500px"
           height={isMobile ? "90vh" : "500px"}
           border={`2px solid ${colors.button}`}
           borderRadius={theme.shape.borderRadius}
@@ -121,7 +137,7 @@ export default function Home() {
           spacing={3}
           sx={{ 
             backgroundColor: '#fafcf5',
-            overflow: 'hidden', // Prevent any content overflow
+            overflow: 'hidden',
           }}
         >
           <Stack
@@ -131,7 +147,7 @@ export default function Home() {
             overflow="auto"
             maxHeight="100%"
             sx={{ 
-              overflowX: 'hidden', // Prevent horizontal scrolling
+              overflowX: 'hidden', 
             }}
           >
             <AnimatePresence>
@@ -190,6 +206,20 @@ export default function Home() {
                 }
               }}
             />
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              variant="outlined"
+              sx={{
+                minWidth: '100px',
+                height: isMobile ? '40px' : '100%',
+                fontSize: isMobile ? '0.9rem' : '1rem',
+              }}
+            >
+              <MenuItem value="en">English</MenuItem>
+              <MenuItem value="es">Spanish</MenuItem>
+              <MenuItem value="it">Italian</MenuItem>
+            </Select>
             <motion.div 
               whileHover={{ scale: 1.05 }} 
               whileTap={{ scale: 0.95 }}
