@@ -8,9 +8,20 @@ const weatherModel = async (location) => {
 
     const encodedLocation = encodeURIComponent(location);
     const url = `https://api.tomorrow.io/v4/weather/realtime?location=${encodedLocation}&apikey=${apiKey}`;
-    const options = { method: 'GET', headers: { accept: 'application/json' } };
+    const options = { 
+      method: 'GET', 
+      headers: { 
+        'Accept': 'application/json' 
+      } 
+    };
 
     const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      console.error('Weather API response error:', response.statusText);
+      return `Could not retrieve weather data for ${location}.`;
+    }
+
     const data = await response.json();
 
     if (!data || data.error) {
