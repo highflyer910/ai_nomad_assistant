@@ -10,7 +10,6 @@
 - **Current Weather Information**: Receive real-time weather updates for any place around the world.
 - **Multi-Language Support**: Interact with the assistant in English, Spanish, or Italian.
 - **LLM Orchestration**: Uses Google Generative AI to deliver engaging and contextually relevant responses.
-- **Weather API Integration**: Fetches current weather details using the Tomorrow.io Weather API.
 
 ## Technologies Used
 
