@@ -1,23 +1,24 @@
-'use client'
+'use client';
 
-import { Box, Button, Stack, TextField, useMediaQuery, useTheme, MenuItem, Select } from '@mui/material'
-import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Box, Button, Stack, TextField, useMediaQuery, useTheme, MenuItem, Select } from '@mui/material';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hey there! I'm here to help you discover hidden gems and unique spots away from the tourist trails and provide you with up-to-date weather information. What would you like to know today?"
+      content: "Hey there! I'm here to help you discover hidden gems and unique spots away from the tourist trails and provide you with up-to-date weather information. What would you like to know today?",
     },
-  ])
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [language, setLanguage] = useState('en') 
-  const messagesEndRef = useRef(null)
+  ]);
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [language, setLanguage] = useState('en');
+  const messagesEndRef = useRef(null);
 
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Pastel color palette
   const colors = {
@@ -26,13 +27,13 @@ export default function Home() {
     user: '#FF6F6F',
     text: '#FAFFEE',
     button: '#3B719F',
-  }
+  };
 
   const sendMessage = async () => {
     if (!message.trim()) return;
 
     setIsLoading(true);
-    
+
     const newMessage = { role: 'user', content: message };
     setMessages((prevMessages) => [
       ...prevMessages,
@@ -71,22 +72,22 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       sendMessage();
     }
-  }
+  };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <Box
@@ -99,43 +100,43 @@ export default function Home() {
       sx={{
         padding: isMobile ? theme.spacing(2) : theme.spacing(4),
         backgroundColor: colors.background,
-        backgroundImage: 'url(/background.svg)', 
-        backgroundSize: 'cover',                
-        backgroundRepeat: 'no-repeat',          
-        backgroundPosition: 'center',           
-        overflowX: 'hidden', 
+        backgroundImage: 'url(/background.svg)',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        overflowX: 'hidden',
       }}
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         style={{ width: '100%', maxWidth: '500px' }}
       >
-        <Box 
-          sx={{ 
-            backgroundColor: colors.assistant, 
-            borderRadius: '12px', 
+        <Box
+          sx={{
+            backgroundColor: colors.assistant,
+            borderRadius: '12px',
             padding: '20px',
             marginBottom: '20px',
-            textAlign: 'center'
+            textAlign: 'center',
           }}
         >
           <h1 style={{ color: colors.text, marginBottom: '10px' }}>NomadAI</h1>
           <p style={{ color: colors.text }}>
-            Explore the unexplored with NomadAI.<br/> Your AI guide finds hidden gems and keeps you up-to-date with the latest weather!
+            Explore the unexplored with NomadAI.<br /> Your AI guide finds hidden gems and keeps you up-to-date with the latest weather!
           </p>
         </Box>
         <Stack
           direction="column"
           width="100%"
           maxWidth="500px"
-          height={isMobile ? "90vh" : "500px"}
+          height={isMobile ? '90vh' : '500px'}
           border={`2px solid ${colors.button}`}
           borderRadius={theme.shape.borderRadius}
           p={2}
           spacing={3}
-          sx={{ 
+          sx={{
             backgroundColor: '#fafcf5',
             overflow: 'hidden',
           }}
@@ -146,8 +147,8 @@ export default function Home() {
             flexGrow={1}
             overflow="auto"
             maxHeight="100%"
-            sx={{ 
-              overflowX: 'hidden', 
+            sx={{
+              overflowX: 'hidden',
             }}
           >
             <AnimatePresence>
@@ -157,7 +158,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
                 >
                   <Box
                     display="flex"
@@ -167,7 +168,7 @@ export default function Home() {
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                     >
                       <Box
                         bgcolor={msg.role === 'assistant' ? colors.assistant : colors.user}
@@ -181,7 +182,7 @@ export default function Home() {
                           overflowWrap: 'break-word',
                         }}
                       >
-                        {msg.content}
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </Box>
                     </motion.div>
                   </Box>
@@ -190,7 +191,7 @@ export default function Home() {
             </AnimatePresence>
             <div ref={messagesEndRef} />
           </Stack>
-          <Stack direction={isMobile ? "column" : "row"} spacing={2} alignItems="stretch">
+          <Stack direction={isMobile ? 'column' : 'row'} spacing={2} alignItems="stretch">
             <TextField
               label="Message"
               fullWidth
@@ -199,11 +200,11 @@ export default function Home() {
               onKeyPress={handleKeyPress}
               disabled={isLoading}
               variant="outlined"
-              size={isMobile ? "small" : "medium"}
+              size={isMobile ? 'small' : 'medium'}
               InputProps={{
                 style: {
                   fontSize: isMobile ? '0.9rem' : '1rem',
-                }
+                },
               }}
             />
             <Select
@@ -220,18 +221,18 @@ export default function Home() {
               <MenuItem value="es">Spanish</MenuItem>
               <MenuItem value="it">Italian</MenuItem>
             </Select>
-            <motion.div 
-              whileHover={{ scale: 1.05 }} 
+            <motion.div
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               style={{ display: 'flex' }}
             >
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={sendMessage}
                 disabled={isLoading}
                 fullWidth={isMobile}
-                style={{ 
-                  height: isMobile ? '40px' : '100%', 
+                style={{
+                  height: isMobile ? '40px' : '100%',
                   minWidth: isMobile ? '100%' : '80px',
                   backgroundColor: colors.button,
                   color: colors.text,
