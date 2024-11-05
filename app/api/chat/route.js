@@ -3,63 +3,92 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import weatherModel from '../../../weatherModel';
 
 const systemPrompt = (language) => `
-You are a friendly and knowledgeable travel assistant with a passion for uncovering hidden gems and off-the-beaten-path destinations.
+You are a friendly and knowledgeable travel assistant with access to real-time and forecast weather data.
+Your responses should include:
+1. Travel recommendations and hidden gems
+2. Weather information when available (current or forecast)
+3. Practical travel tips based on weather conditions
 
-When responding to user queries, imagine that you have access to a vast library of travel guides, local recommendations, and insider tips. Use this "knowledge" to provide detailed, engaging, and lesser-known travel suggestions that are sure to delight and surprise the user.
-
-Always include specific details, such as the best time to visit, unique activities to try, and cultural insights that make the destination special. Inject a sense of excitement and wonder into your responses to inspire the user's imagination.
+When weather data is provided, incorporate it naturally into your travel advice.
+If no weather data is available, still provide travel information but mention that weather data couldn't be fetched.
 
 Respond in ${language === 'es' ? 'Spanish' : language === 'it' ? 'Italian' : 'English'}.
 
-User: {userMessage}
-Assistant:
+Weather Info: {weatherInfo}
+User Question: {userMessage}
 `;
 
-const apiKey = process.env.GOOGLE_API_KEY;
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
-if (!apiKey) {
-  console.error("API key is missing");
-}
+function extractLocationAndType(message) {
+  console.log('Analyzing message:', message);
+  
+  // Clean up the message
+  const cleanMessage = message.toLowerCase().trim();
+  
+  // Determine if it's a forecast request
+  const isForecast = cleanMessage.includes('forecast') || 
+                    cleanMessage.includes('this week') || 
+                    cleanMessage.includes('next week') ||
+                    cleanMessage.includes('tomorrow');
+  
+  // Extract location patterns
+  const patterns = [
+    /(?:weather|forecast|temperature|current)\s+(?:in|for|at)\s+([A-Za-z\s,]+)/i,
+    /(?:how(?:'s| is) the weather in)\s+([A-Za-z\s,]+)/i,
+    /(?:what(?:'s| is) the weather like in)\s+([A-Za-z\s,]+)/i,
+    /(?:visit|traveling to|going to)\s+([A-Za-z\s,]+)/i
+  ];
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-function extractLocation(message) {
-  const cityRegex = /(?:weather|forecast|temperature)\s+(?:in|for|at)\s+([A-Za-z\s]+)/i;
-  const match = message.match(cityRegex);
-  return match ? match[1].trim() : null;
+  for (const pattern of patterns) {
+    const match = message.match(pattern);
+    if (match) {
+      const location = match[1].trim();
+      console.log('Found location:', location, 'Type:', isForecast ? 'forecast' : 'realtime');
+      return { location, type: isForecast ? 'forecast' : 'realtime' };
+    }
+  }
+  
+  return { location: null, type: 'realtime' };
 }
 
 export async function POST(req) {
   try {
     const data = await req.json();
-    const { message: userMessage, language } = data;
+    const { message: userMessage, language = 'en' } = data;
 
-    if (!userMessage) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    if (!userMessage?.trim()) {
+      return NextResponse.json(
+        { error: 'Message is required' },
+        { status: 400 }
+      );
     }
 
-    if (!language) {
-      return NextResponse.json({ error: 'Language is required' }, { status: 400 });
-    }
-
-    const location = extractLocation(userMessage);
+    const { location, type } = extractLocationAndType(userMessage);
     let weatherInfo = null;
 
     if (location) {
-      weatherInfo = await weatherModel(location);
+      weatherInfo = await weatherModel(location, type);
     }
 
-    const fullMessage = weatherInfo ? `${weatherInfo}` : userMessage;
-
-    const prompt = systemPrompt(language).replace('{userMessage}', fullMessage);
+    const prompt = systemPrompt(language)
+      .replace('{weatherInfo}', weatherInfo || 'Weather data is currently unavailable.')
+      .replace('{userMessage}', userMessage);
 
     const result = await model.generateContent(prompt);
     const response = await result.response.text();
 
-    return NextResponse.json({ message: response });
+    return NextResponse.json({ 
+      message: response,
+      weatherData: weatherInfo ? { location, info: weatherInfo, type } : null
+    });
+
   } catch (error) {
-    console.error('Error generating response:', error);
-    return NextResponse.json({ error: 'Error generating response' }, { status: 500 });
+    console.error('Error in chat API:', error);
+    return NextResponse.json(
+      { error: 'Failed to process request', details: error.message },
+      { status: 500 }
+    );
   }
 }
