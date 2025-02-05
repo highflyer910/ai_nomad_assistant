@@ -14,6 +14,7 @@
     "@google/generative-ai": "^0.16.0",
     "@mui/material": "^5.16.6",
     "framer-motion": "^11.3.21",
+    "groq-sdk": "^0.15.0",
     "next": "14.2.5",
     "node-fetch": "^2.7.0",
     "react": "^18",
