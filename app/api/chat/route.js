@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import fetch from "node-fetch";
 
-// Initialize Groq API client
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Initialize Google Generative AI
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const WEATHER_API_BASE_URL = "http://api.weatherapi.com/v1";
 
@@ -31,8 +31,6 @@ User Question: {userMessage}
 
 Respond in ${language === "es" ? "Spanish" : language === "it" ? "Italian" : "English"}.
 `;
-
-
 
 async function fetchWeather(location, type) {
   try {
@@ -62,6 +60,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
+    // Check if API key is available
+    if (!process.env.GOOGLE_API_KEY) {
+      console.error("GOOGLE_API_KEY is not set");
+      return NextResponse.json({ error: "API configuration error" }, { status: 500 });
+    }
+
     const { location, type } = extractLocationAndType(userMessage);
     let weatherInfo = null;
 
@@ -73,23 +77,36 @@ export async function POST(req) {
       .replace("{weatherInfo}", weatherInfo ? JSON.stringify(weatherInfo) : "Weather data is currently unavailable.")
       .replace("{userMessage}", userMessage);
 
-    // Call Groq AI API using SDK
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama3-8b-8192",
-      max_tokens: 500,
-      temperature: 0.7,
-    });
+    console.log("Prompt:", prompt); // Debug log
 
-    const responseMessage = chatCompletion.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    // Call Google Generative AI API
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const responseMessage = response.text() || "Sorry, I couldn't generate a response.";
 
-    return NextResponse.json({
-      message: responseMessage,
-      weatherData: weatherInfo ? { location, info: weatherInfo, type } : null,
-    });
+      console.log("Google AI Response successful"); // Debug log
+
+      return NextResponse.json({
+        message: responseMessage,
+        weatherData: weatherInfo ? { location, info: weatherInfo, type } : null,
+      });
+    } catch (googleError) {
+      console.error("Google AI API error:", googleError);
+      return NextResponse.json({ 
+        error: "Google AI API error", 
+        details: googleError.message 
+      }, { status: 500 });
+    }
+
   } catch (error) {
     console.error("Error in chat API:", error);
-    return NextResponse.json({ error: "Failed to process request", details: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Failed to process request", 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 
